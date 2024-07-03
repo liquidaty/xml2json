@@ -1,10 +1,24 @@
 #CXX = 
 
+WIN=
+EXE_SUFFIX=
+ifeq ($(WIN),)
+  WIN=0
+  ifneq ($(findstring w64,$(CC)),) # e.g. mingw64
+    WIN=1
+    EXE_SUFFIX=.exe
+  endif
+endif
+
+ifeq ($(WIN),1)
+LINKOPTIONS = -Wl,--gc-sections -Wl,--strip-all
+else
 UNAME := $(shell uname -s)
 ifeq ($(UNAME), Darwin)
 LINKOPTIONS = -Wl,-search_paths_first -Wl,-dead_strip -v
 else
 LINKOPTIONS = -Wl,--gc-sections -Wl,--strip-all
+endif
 endif
 
 INCLUDE += -I./include/
@@ -19,6 +33,14 @@ EXEC 	= xml2json
 
 all : ${EXEC}
 
+install: all
+ifeq ($(PREFIX),)
+	echo 1>&2 "Missing PREFIX variable"
+	exit 1
+else
+	${SUDO} cp -p xml2json${EXE_SUFFIX} ${PREFIX}/bin/
+endif
+
 xml2json.gch : include/xml2json.hpp
 	${CXX} ${COMPILEOPTIONS}  -c $< -o $@
 
@@ -29,4 +51,4 @@ ${EXEC} : ${MAIN} ${OBJECTS}
 	${CXX} ${LINKOPTIONS} ${MAIN} -o ${EXEC}
 
 clean :
-	rm *.gch *.o ${EXEC}
+	rm -f *.gch *.o ${EXEC}
