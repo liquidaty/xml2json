@@ -11,7 +11,7 @@ ifeq ($(WIN),)
 endif
 
 ifeq ($(WIN),1)
-LINKOPTIONS = -Wl,--gc-sections -Wl,--strip-all
+LINKOPTIONS = -Wl,--gc-sections -Wl,--strip-all -static
 else
 UNAME := $(shell uname -s)
 ifeq ($(UNAME), Darwin)
